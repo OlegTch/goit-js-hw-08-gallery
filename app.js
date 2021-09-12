@@ -72,7 +72,7 @@ const refs = {
   lightboxImage: document.querySelector('.lightbox__image'),
 };
 
-function createItem({ preview, original, description }) {
+function createItem({ preview, original, description }, idx) {
   const item = document.createElement('li');
   const link = document.createElement('a');
   const image = document.createElement('img');
@@ -80,11 +80,13 @@ function createItem({ preview, original, description }) {
   item.classList.add('gallery__item');
   link.classList.add('gallery__link');
   image.classList.add('gallery__image');
+  image.setAttribute('data-index', idx);
 
   link.href = original;
   image.src = preview;
   image.alt = description;
   image.dataset.source = original;
+  //   image.dataset.index = idx;
 
   item.append(link);
   link.append(image);
@@ -92,8 +94,8 @@ function createItem({ preview, original, description }) {
   return item;
 }
 
-const createListGallary = galleryItems.map(galleryItem => {
-  return createItem(galleryItem);
+const createListGallary = galleryItems.map((galleryItem, idx) => {
+  return createItem(galleryItem, `${idx + 1}`);
 });
 
 refs.list.append(...createListGallary);
@@ -159,6 +161,7 @@ function onLeftPress(event) {
   const LEFT_KEY_CODE = 'ArrowLeft';
   if (event.code === LEFT_KEY_CODE) {
     console.log('Прокрутка влево');
+    privImg();
   }
 }
 
@@ -166,5 +169,36 @@ function onRigthPress(event) {
   const RIGHT_KEY_CODE = 'ArrowRight';
   if (event.code === RIGHT_KEY_CODE) {
     console.log('Прокрутка вправо');
+    nextImg();
   }
+}
+
+function findIndexImageInObject(src) {
+  return galleryItems.indexOf(
+    galleryItems.find(element => element.original === src),
+  );
+}
+
+function privImg() {
+  let currentImageIndex = findIndexImageInObject(
+    refs.lightboxImage.getAttribute('src'),
+  );
+  if (currentImageIndex == 0) {
+    currentImageIndex = galleryItems.length;
+    // console.log('Переход с первой картинки на последнюю');
+  }
+  refs.lightboxImage.src = galleryItems[currentImageIndex - 1].original;
+  refs.lightboxImage.alt = galleryItems[currentImageIndex - 1].description;
+}
+
+function nextImg() {
+  let currentImageIndex = findIndexImageInObject(
+    refs.lightboxImage.getAttribute('src'),
+  );
+  if (currentImageIndex === galleryItems.length - 1) {
+    currentImageIndex = -1;
+    // console.log('Переход с последней картинки на первую');
+  }
+  refs.lightboxImage.src = galleryItems[currentImageIndex + 1].original;
+  refs.lightboxImage.alt = galleryItems[currentImageIndex + 1].description;
 }
